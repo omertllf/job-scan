@@ -11,6 +11,16 @@ description: >
   "update my job list", "what new jobs came in", "job search update", "grade my
   jobs", "which CV should I send", or asks to refresh their job tracker.
 compatibility: "Requires Gmail MCP and a file-access tool (Desktop Commander MCP or equivalent) for reading local CV files and writing the HTML report."
+metadata:
+  display_name:
+    he: סריקת משרות יומית
+    en: Daily Job Scan
+  display_description:
+    he: סורק Gmail לאיתור התראות משרות, מדרג כל משרה לפי התאמה לקורות החיים, ומפיק דוח HTML יומי עם המלצת גרסת קורות החיים לכל תפקיד.
+    en: Scans Gmail for job alert emails, grades each role against your CV files, and produces a daily HTML report with per-role CV version recommendations.
+  tags:
+    he: ["חיפוש עבודה", "משרות", "Gmail", "קורות חיים", "אוטומציה", "דוח HTML"]
+    en: ["job search", "jobs", "Gmail", "resume", "automation", "HTML report"]
 ---
 
 # Job Scan Skill
