@@ -1,0 +1,22 @@
+{
+  "author": "omertllf",
+  "version": "1.0.0",
+  "category": "productivity",
+  "tags": {
+    "he": ["חיפוש עבודה", "משרות", "Gmail", "קורות חיים", "אוטומציה", "דוח HTML"],
+    "en": ["job search", "jobs", "Gmail", "resume", "automation", "HTML report"]
+  },
+  "display_name": {
+    "he": "סריקת משרות יומית",
+    "en": "Daily Job Scan"
+  },
+  "display_description": {
+    "he": "סורק Gmail לאיתור התראות משרות, מדרג כל משרה לפי התאמה לקורות החיים, ומפיק דוח HTML יומי עם המלצת גרסת קורות החיים לכל תפקיד.",
+    "en": "Scans Gmail for job alert emails, grades each role against your CV files, and produces a daily HTML report with per-role CV version recommendations."
+  },
+  "supported_agents": [
+    "claude-code",
+    "claude-ai",
+    "claude-desktop"
+  ]
+}
