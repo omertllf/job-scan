@@ -5,12 +5,12 @@ description: >
   Drushim, and other job boards. Extracts and deduplicates all job listings,
   checks application confirmation and rejection emails, grades each job for fit
   against the user's CV files, recommends the best CV version per role, and
-  writes a styled HTML report to a local folder. Also creates a Gmail draft
-  summary email.
+  writes a styled HTML report to a local folder, then auto-sends it as an
+  email attachment via Gmail MCP — no draft, no manual confirmation step.
   Trigger whenever the user says "scan jobs", "run job scan", "check new jobs",
   "update my job list", "what new jobs came in", "job search update", "grade my
   jobs", "which CV should I send", or asks to refresh their job tracker.
-compatibility: "Requires Gmail MCP and a file-access tool (Desktop Commander MCP or equivalent) for reading local CV files and writing the HTML report."
+compatibility: "Requires Gmail MCP (must support sending with attachments) and a file-access tool (Desktop Commander MCP or equivalent) for reading local CV files and writing the HTML report. Auto-sends email without user review — confirm once before first run."
 ---
 
 # Job Scan Skill
@@ -42,16 +42,39 @@ If this is a recurring run and settings were established previously, reuse them.
 
 ### Load CV files
 
-Read all CV/resume files from `cv_folder`. Supported formats: `.docx`, `.pdf`, `.txt`.
-For each file found, extract:
+CV files may exist in two places. Resolve to one authoritative version per label
+before grading — **local folder always takes priority**.
+
+**Step 0a — Read `cv_folder` first**
+
+Use the file-access tool to list all CV/resume files in `cv_folder`.
+Supported formats: `.docx`, `.pdf`, `.txt`. Record each file's **last modified
+date** from filesystem metadata.
+
+**Step 0b — Check Project knowledge / attached context**
+
+Then check whether any CV files are present as attached project knowledge or
+conversation context. For each CV label, note whether a context version exists.
+Context files do not expose reliable modification timestamps.
+
+**Step 0c — Resolve to one version per label**
+
+- If only the local file exists → use it.
+- If only the context file exists → use it; flag in output that no local copy
+  was found (the local folder is the source of truth going forward).
+- If both exist → prefer the local file (it has a verifiable timestamp).
+  If content differs materially, flag: `⚠️ CV version conflict — local and
+  context copies differ, verify manually`.
+
+For each resolved CV file, extract:
 - **Label** — short version name derived from the filename (e.g. "CV_Pd", "Resume_v3")
-- **Last modified date** — from filesystem metadata
+- **Source** — "local" or "context" and last modified date if local
 - **Target role framing** — what seniority/title does this CV lead with?
 - **Top keywords** — domains, technologies, methodologies most prominent
 - **Differentiators** — what makes this version distinct from others?
 
-If no CV files are found, skip Steps 0 and 4, note it in the report, and
-continue with the rest of the scan.
+If no CV files are found in either place, skip Step 4, note it in the report,
+and continue with the rest of the scan.
 
 ---
 
@@ -311,12 +334,15 @@ List up to 5 top picks (High fit + status New). If none, say so clearly.
 
 ---
 
-## Step 7 — Email Draft
+## Step 7 — Send Email with Attached Report
 
-Create a Gmail draft. Do **not** send automatically.
+**Send immediately — do not create a draft.** Use the Gmail MCP send function
+with the HTML file attached directly. Do not link to a file path; attach the
+file as a binary attachment so it opens in any email client.
 
 - **To:** `{report_email}`
 - **Subject:** `Job Scan Report — {today's date}`
+- **Attachment:** `{output_folder}\Job_Scan_{date}.html` (attach the file, do not paste its contents)
 - **Body:**
 
 ```
@@ -343,11 +369,13 @@ TOP PICKS (High fit, New)
 FLAGS
 -----
 {Any warnings}
-
-Full report: {output_folder}\Job_Scan_{date}.html
 ```
 
-Tell the user: "Draft created — review and send when ready."
+**Fail-loud rule:** If the Gmail MCP cannot attach the HTML file (unsupported
+operation, permission error, file not found), **stop immediately** and surface
+the error to the user. Do not send the email without the attachment, and do not
+silently fall back to a draft or a body-only email. The attachment is the
+deliverable; a plain-text email without it is not acceptable.
 
 ---
 
